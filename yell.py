@@ -1,9 +1,12 @@
 import sys
+import time
 import pandas as pd
+from random import randint
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 
 WAITING_TIME=5
+RANDOM_WAITING_TIME = randint(0, 13)
 # driver = webdriver.Chrome('/Users/bhuwanbhatt/Downloads/chromedriver')
 driver = webdriver.Safari()
 driver.get("http://www.yell.com")
@@ -34,6 +37,7 @@ categories_links = [x.get_attribute("href") for x in categories_element]
 
 
 for link in categories_links:
+    time.sleep(RANDOM_WAITING_TIME)
     driver.get(link)
     print(driver.title)
     break
@@ -42,15 +46,17 @@ for link in categories_links:
 
 driver.implicitly_wait(WAITING_TIME) # seconds
 get_london = driver.find_element_by_partial_link_text("London")
-print(get_london.text)
+# print(get_london.text)
 
 link_is = get_london.get_attribute("href")
 driver.implicitly_wait(WAITING_TIME) # seconds
+time.sleep(RANDOM_WAITING_TIME)
 driver.get(link_is)
 
 
 # Getting pagination links
 pagination_links_elements=[]
+time.sleep(RANDOM_WAITING_TIME)
 pagination_links_elements = driver.find_elements_by_css_selector('.pagination div:nth-of-type(2) a')
 
 # for an_element in pagination_links_elements:
@@ -69,7 +75,7 @@ def scrape_page():
     """
 
     all_articles = []
-
+    time.sleep(RANDOM_WAITING_TIME)
     all_articles = driver.find_elements_by_css_selector(".businessCapsule")
 
 
@@ -77,6 +83,7 @@ def scrape_page():
     for article in all_articles:
 
         # For gettting the website link
+        time.sleep(RANDOM_WAITING_TIME)
         a_website = article.find_elements_by_xpath(".//a[contains(@class,'businessCapsule--ctaItem')]")
         # dummy_site = a_website.find_element_by_class_name('businessCapsule--ctaItem')
         if len(a_website)>0:
@@ -91,6 +98,7 @@ def scrape_page():
         else:
             websites.append("null")
 
+        time.sleep(RANDOM_WAITING_TIME)
         # For getting the business name
         a_business = article.find_element_by_xpath(".//a[@class='businessCapsule--name']")
         a_business_name = a_business.text
@@ -99,6 +107,8 @@ def scrape_page():
         else:
             businessNames.append("null")
 
+        time.sleep(RANDOM_WAITING_TIME)
+        # For getting the phone number
         a_phone = article.find_element_by_xpath(".//span[@class='business--telephoneNumber']")
         a_phoneNumber = a_phone.text
         if a_phone != None or " " or "":
