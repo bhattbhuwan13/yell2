@@ -1,6 +1,8 @@
 import sys
+import pandas as pd
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
+
 WAITING_TIME=5
 # driver = webdriver.Chrome('/Users/bhuwanbhatt/Downloads/chromedriver')
 driver = webdriver.Safari()
@@ -19,9 +21,11 @@ businessNames = []
 websites = []
 phoneNumbers=[]
 
-categories_element=[] # Use this list to extract category name
+categories_element=[]
 
 categories_element = driver.find_elements_by_css_selector('.home--popularSearchesList div:nth-of-type(2) div li a')
+# Use this list k/a categories_element to extract category name
+fileName= categories_element[0].text
 
 # Getting the link of each occupational category
 categories_links = [x.get_attribute("href") for x in categories_element]
@@ -49,8 +53,14 @@ driver.get(link_is)
 pagination_links_elements=[]
 pagination_links_elements = driver.find_elements_by_css_selector('.pagination div:nth-of-type(2) a')
 
+# for an_element in pagination_links_elements:
+#     driver.implicitly_wait(WAITING_TIME)
+#     print(an_element)
+#     an_element.click()
+
+# sys.exit()
 pagination_links = [link.get_attribute("href") for link in pagination_links_elements]
-print(pagination_links)
+# print(pagination_links)
 # sys.exit()
 
 def scrape_page():
@@ -96,7 +106,26 @@ def scrape_page():
         else:
             phoneNumbers.append("null")
 
-    for i in range(0,len(all_articles)):
-        print(businessNames[i], "\t",phoneNumbers[i],"\t",websites[i])
+
+
+def createCSV(name,website,phone):
+    all_businesses = {
+    'Business Name':name,
+    'Website':website,
+    'Phone':phone
+    }
+    df = pd.DataFrame(all_businesses,columns=['Business Name','Website','Phone'])
+    df.to_csv(fileName + '.csv',index = False)
 
 scrape_page()
+
+# for links in pagination_links_elements:
+#     driver.implicitly_wait(WAITING_TIME) # seconds
+#     links.click()
+#     scrape_page()
+# i = 1
+for link in pagination_links:
+    # i = i + 1
+    driver.get(link)
+    scrape_page()
+createCSV(businessNames,websites,phoneNumbers)
