@@ -6,7 +6,8 @@ from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 
 WAITING_TIME=5
-RANDOM_WAITING_TIME = randint(0, 13)
+RANDOM_WAITING_TIME = randint(5, 8)
+PAGE_LOAD_TIME = 30
 # driver = webdriver.Chrome('/Users/bhuwanbhatt/Downloads/chromedriver')
 driver = webdriver.Safari()
 driver.get("http://www.yell.com")
@@ -44,13 +45,14 @@ for link in categories_links:
 
 
 
-driver.implicitly_wait(WAITING_TIME) # seconds
+# driver.implicitly_wait(WAITING_TIME) # seconds
 get_london = driver.find_element_by_partial_link_text("London")
 # print(get_london.text)
 
 link_is = get_london.get_attribute("href")
 driver.implicitly_wait(WAITING_TIME) # seconds
 time.sleep(RANDOM_WAITING_TIME)
+driver.set_page_load_timeout(PAGE_LOAD_TIME)
 driver.get(link_is)
 
 
@@ -83,7 +85,7 @@ def scrape_page():
     for article in all_articles:
 
         # For gettting the website link
-        time.sleep(RANDOM_WAITING_TIME)
+        # time.sleep(RANDOM_WAITING_TIME)
         a_website = article.find_elements_by_xpath(".//a[contains(@class,'businessCapsule--ctaItem')]")
         # dummy_site = a_website.find_element_by_class_name('businessCapsule--ctaItem')
         if len(a_website)>0:
@@ -98,7 +100,7 @@ def scrape_page():
         else:
             websites.append("null")
 
-        time.sleep(RANDOM_WAITING_TIME)
+        # time.sleep(RANDOM_WAITING_TIME)
         # For getting the business name
         a_business = article.find_element_by_xpath(".//a[@class='businessCapsule--name']")
         a_business_name = a_business.text
@@ -107,7 +109,7 @@ def scrape_page():
         else:
             businessNames.append("null")
 
-        time.sleep(RANDOM_WAITING_TIME)
+        # time.sleep(RANDOM_WAITING_TIME)
         # For getting the phone number
         a_phone = article.find_element_by_xpath(".//span[@class='business--telephoneNumber']")
         a_phoneNumber = a_phone.text
@@ -136,6 +138,9 @@ scrape_page()
 # i = 1
 for link in pagination_links:
     # i = i + 1
+    time.sleep(RANDOM_WAITING_TIME)
+    driver.implicitly_wait(WAITING_TIME)
+    driver.set_page_load_timeout(PAGE_LOAD_TIME)
     driver.get(link)
     scrape_page()
 createCSV(businessNames,websites,phoneNumbers)
