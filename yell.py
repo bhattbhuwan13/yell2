@@ -17,17 +17,16 @@ elem.send_keys("london")
 elem.send_keys(Keys.RETURN)
 assert "No results found." not in driver.page_source
 
-# required = driver.find_element_by_link_text("Accountants")
-# required.click()
-# These lists will hold the data scraped from the site
+
 
 businessNames = []
 websites = []
 phoneNumbers=[]
-
+categoryNames=[] #Name of the category
 categories_element=[]
 
 categories_element = driver.find_elements_by_css_selector('.home--popularSearchesList div:nth-of-type(2) div li a')
+
 # Use this list k/a categories_element to extract category name
 fileName= categories_element[0].text
 
@@ -35,7 +34,6 @@ fileName= categories_element[0].text
 categories_links = [x.get_attribute("href") for x in categories_element]
 
 # Remove all the location links from the categories_links
-
 
 for link in categories_links:
     time.sleep(RANDOM_WAITING_TIME)
@@ -50,6 +48,7 @@ get_london = driver.find_element_by_partial_link_text("London")
 # print(get_london.text)
 
 link_is = get_london.get_attribute("href")
+
 driver.implicitly_wait(WAITING_TIME) # seconds
 time.sleep(RANDOM_WAITING_TIME)
 driver.set_page_load_timeout(PAGE_LOAD_TIME)
@@ -58,18 +57,13 @@ driver.get(link_is)
 
 # Getting pagination links
 pagination_links_elements=[]
-time.sleep(RANDOM_WAITING_TIME)
+time.sleep(3)
 pagination_links_elements = driver.find_elements_by_css_selector('.pagination div:nth-of-type(2) a')
 
-# for an_element in pagination_links_elements:
-#     driver.implicitly_wait(WAITING_TIME)
-#     print(an_element)
-#     an_element.click()
 
-# sys.exit()
+
 pagination_links = [link.get_attribute("href") for link in pagination_links_elements]
-# print(pagination_links)
-# sys.exit()
+
 
 def scrape_page():
     """
@@ -119,18 +113,26 @@ def scrape_page():
             phoneNumbers.append("null")
 
 
+        a_category_name = driver.find_element_by_name("keywords")
+        a_category = a_category_name.get_attribute("value")
+        if a_category_name != None or " " or "":
+            categoryNames.append(a_category)
+        else:
+            categoryNames.append("null")
 
-def createCSV(name,website,phone):
+def createCSV(name,website,phone,category):
     all_businesses = {
     'Business Name':name,
     'Website':website,
-    'Phone':phone
+    'Phone':phone,
+    'Business Type':category
     }
-    df = pd.DataFrame(all_businesses,columns=['Business Name','Website','Phone'])
-    df.to_csv(fileName + '.csv',index = False)
+    df = pd.DataFrame(all_businesses,columns=['Business Name','Website','Phone','Business Type'])
+    df.to_csv('yellNew.csv',index = False)
 
 scrape_page()
-
+createCSV(businessNames,websites,phoneNumbers,categoryNames)
+sys.exit()
 # for links in pagination_links_elements:
 #     driver.implicitly_wait(WAITING_TIME) # seconds
 #     links.click()
