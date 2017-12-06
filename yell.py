@@ -15,8 +15,12 @@ assert "No results found." not in driver.page_source
 # required.click()
 
 categories_element=[]
-categories_element = driver.find_elements_by_xpath("//a[@class='home--popularItemLink']")
+# categories_element = driver.find_elements_by_xpath("//a[@class='home--popularItemLink']")
 
+categories_element = driver.find_elements_by_css_selector('.home--popularSearchesList div:nth-of-type(2) div li a')
+for category in categories_element:
+    print(category.text,"\t",category.get_attribute("href"))
+sys.exit()
 
 categories_links = [x.get_attribute("href") for x in categories_element]
 
@@ -35,25 +39,39 @@ link_is = get_london.get_attribute("href")
 driver.get(link_is)
 
 
-# Getting the name of the business
-businessName = []
-# businessName = driver.find_elements_by_xpath("//a[@class='businessCapsule--name']/h2")
-# [print(name.text) for name in businessName]
-businessName = driver.find_elements_by_xpath("//a[@class='businessCapsule--name']")
-[print(name.text) for name in businessName]
-
-
-# Getting the websites
-
+all_articles = []
+businessNames = []
 websites = []
-# businessName = driver.find_elements_by_xpath("//a[@class='businessCapsule--name']/h2")
-# [print(name.text) for name in businessName]
-websites = driver.find_elements_by_css_selector('.businessCapsule--ctas a:nth-of-type(2)')
-# print(websites)
-websites_links = [x.get_attribute("href") for x in websites]
-[print(a) for a in websites_links]
+all_articles = driver.find_elements_by_css_selector(".businessCapsule")
 
 
-print("Lengths")
-print(len(businessName))
-print(len(websites))
+
+for article in all_articles:
+
+    # For gettting the website link
+    a_website = article.find_elements_by_xpath(".//a[contains(@class,'businessCapsule--ctaItem')]")
+    # dummy_site = a_website.find_element_by_class_name('businessCapsule--ctaItem')
+    if len(a_website)>0:
+        web_link = a_website[-1].get_attribute("href")
+        # print(web_link)
+        # sys.exit()
+
+        if (web_link != None or " " or ""):
+            websites.append(web_link)
+        else:
+            websites.append("null")
+    else:
+        websites.append("null")
+
+    # For getting the business name
+    a_business = article.find_element_by_xpath(".//a[@class='businessCapsule--name']")
+    a_business_name = a_business.text
+    if a_business_name != None or " " or "":
+        businessNames.append(a_business_name)
+    else:
+        businessNames.append("null")
+
+print(len(all_articles))
+
+for i in range(0,len(all_articles)):
+    print(businessNames[i], "\t",websites[i])

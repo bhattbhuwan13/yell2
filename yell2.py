@@ -19,7 +19,8 @@ categories_element = driver.find_elements_by_xpath("//a[@class='home--popularIte
 
 
 categories_links = [x.get_attribute("href") for x in categories_element]
-
+print(categories_links)
+sys.exit()
 # Remove all the location links from the categories_links
 
 
