@@ -4,12 +4,26 @@ import pandas as pd
 from random import randint
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver import DesiredCapabilities
 
-WAITING_TIME=5
-RANDOM_WAITING_TIME = randint(5, 8)
-PAGE_LOAD_TIME = 30
-# driver = webdriver.Chrome('/Users/bhuwanbhatt/Downloads/chromedriver')
-driver = webdriver.Safari()
+time.sleep(15)
+WAITING_TIME=0
+RANDOM_WAITING_TIME = randint(13, 18)
+SIMPLE_WAITING_TIME = randint(4, 8)
+PAGE_LOAD_TIME = 60
+INITIAL = 49
+FINAL = INITIAL+1
+
+root = 'csv'
+driver = webdriver.Chrome('/Users/bhuwanbhatt/Downloads/chromedriver')
+# driver = webdriver.Safari()
+
+# desired_capabilities = DesiredCapabilities.PHANTOMJS.copy()
+# desired_capabilities['phantomjs.page.customHeaders.User-Agent'] = 'AppleWebKit/537.36 (KHTML, like Gecko) '
+# driver = webdriver.PhantomJS(desired_capabilities=desired_capabilities)
+
+time.sleep(RANDOM_WAITING_TIME)
+
 driver.get("http://www.yell.com")
 elem = driver.find_element_by_name("location")
 elem.clear()
@@ -28,41 +42,11 @@ categories_element=[]
 categories_element = driver.find_elements_by_css_selector('.home--popularSearchesList div:nth-of-type(2) div li a')
 
 # Use this list k/a categories_element to extract category name
-fileName= categories_element[0].text
-
+fileName= categories_element[INITIAL].text
+# print(fileName)
 # Getting the link of each occupational category
 categories_links = [x.get_attribute("href") for x in categories_element]
-
-# Remove all the location links from the categories_links
-
-for link in categories_links:
-    time.sleep(RANDOM_WAITING_TIME)
-    driver.get(link)
-    print(driver.title)
-    break
-
-
-
-# driver.implicitly_wait(WAITING_TIME) # seconds
-get_london = driver.find_element_by_partial_link_text("London")
-# print(get_london.text)
-
-link_is = get_london.get_attribute("href")
-
-driver.implicitly_wait(WAITING_TIME) # seconds
-time.sleep(RANDOM_WAITING_TIME)
-driver.set_page_load_timeout(PAGE_LOAD_TIME)
-driver.get(link_is)
-
-
-# Getting pagination links
-pagination_links_elements=[]
-time.sleep(3)
-pagination_links_elements = driver.find_elements_by_css_selector('.pagination div:nth-of-type(2) a')
-
-
-
-pagination_links = [link.get_attribute("href") for link in pagination_links_elements]
+# print(categories_links[0:1])
 
 
 def scrape_page():
@@ -71,21 +55,21 @@ def scrape_page():
     """
 
     all_articles = []
-    time.sleep(RANDOM_WAITING_TIME)
+    #time.sleep(RANDOM_WAITING_TIME)
     all_articles = driver.find_elements_by_css_selector(".businessCapsule")
-
+    a_category_name = driver.find_element_by_name("keywords")
+    a_category = a_category_name.get_attribute("value")
 
 
     for article in all_articles:
 
-        # For gettting the website link
-        # time.sleep(RANDOM_WAITING_TIME)
-        a_website = article.find_elements_by_xpath(".//a[contains(@class,'businessCapsule--ctaItem')]")
-        # dummy_site = a_website.find_element_by_class_name('businessCapsule--ctaItem')
+        try:
+            a_website = article.find_elements_by_xpath(".//a[contains(@class,'businessCapsule--ctaItem')]")
+        except:
+            a_website=[]
+
         if len(a_website)>0:
             web_link = a_website[-1].get_attribute("href")
-            # print(web_link)
-            # sys.exit()
 
             if (web_link != None or " " or ""):
                 websites.append(web_link)
@@ -94,31 +78,30 @@ def scrape_page():
         else:
             websites.append("null")
 
-        # time.sleep(RANDOM_WAITING_TIME)
-        # For getting the business name
         a_business = article.find_element_by_xpath(".//a[@class='businessCapsule--name']")
         a_business_name = a_business.text
         if a_business_name != None or " " or "":
             businessNames.append(a_business_name)
         else:
             businessNames.append("null")
-
-        # time.sleep(RANDOM_WAITING_TIME)
-        # For getting the phone number
-        a_phone = article.find_element_by_xpath(".//span[@class='business--telephoneNumber']")
-        a_phoneNumber = a_phone.text
+        try:
+            a_phone = article.find_element_by_xpath(".//span[@class='business--telephoneNumber']")
+            a_phoneNumber = a_phone.text
+        except:
+            a_phone = ""
+            a_phoneNumber = "null"
         if a_phone != None or " " or "":
             phoneNumbers.append(a_phoneNumber)
         else:
             phoneNumbers.append("null")
 
 
-        a_category_name = driver.find_element_by_name("keywords")
-        a_category = a_category_name.get_attribute("value")
+
         if a_category_name != None or " " or "":
             categoryNames.append(a_category)
         else:
             categoryNames.append("null")
+
 
 def createCSV(name,website,phone,category):
     all_businesses = {
@@ -128,21 +111,46 @@ def createCSV(name,website,phone,category):
     'Business Type':category
     }
     df = pd.DataFrame(all_businesses,columns=['Business Name','Website','Phone','Business Type'])
-    df.to_csv('yellNew.csv',index = False)
+    df.to_csv(root + '/'+ fileName + '.csv',index = False)
 
-scrape_page()
-createCSV(businessNames,websites,phoneNumbers,categoryNames)
-sys.exit()
-# for links in pagination_links_elements:
-#     driver.implicitly_wait(WAITING_TIME) # seconds
-#     links.click()
-#     scrape_page()
-# i = 1
-for link in pagination_links:
-    # i = i + 1
+
+for link in categories_links[INITIAL:FINAL]:
+    # driver.implicitly_wait(WAITING_TIME) # seconds
     time.sleep(RANDOM_WAITING_TIME)
-    driver.implicitly_wait(WAITING_TIME)
     driver.set_page_load_timeout(PAGE_LOAD_TIME)
     driver.get(link)
+
+
+
+    # driver.implicitly_wait(WAITING_TIME) # seconds
+    get_london = driver.find_element_by_partial_link_text("London")
+    # print(get_london.text)
+
+    link_is = get_london.get_attribute("href")
+
+    driver.implicitly_wait(WAITING_TIME) # seconds
+    #time.sleep(RANDOM_WAITING_TIME)
+    driver.set_page_load_timeout(PAGE_LOAD_TIME)
+    driver.get(link_is)
+
+
+    # Getting pagination links
+    pagination_links_elements=[]
+    #time.sleep(3)
+    pagination_links_elements = driver.find_elements_by_css_selector('.pagination div:nth-of-type(2) a')
+
+
+    time.sleep(SIMPLE_WAITING_TIME)
+    pagination_links = [link.get_attribute("href") for link in pagination_links_elements]
     scrape_page()
-createCSV(businessNames,websites,phoneNumbers)
+
+    for link in pagination_links:
+        # driver.implicitly_wait(WAITING_TIME)
+        time.sleep(SIMPLE_WAITING_TIME)
+        driver.set_page_load_timeout(PAGE_LOAD_TIME)
+        driver.get(link)
+        scrape_page()
+        time.sleep(RANDOM_WAITING_TIME)
+
+createCSV(businessNames,websites,phoneNumbers,categoryNames)
+driver.quit()
